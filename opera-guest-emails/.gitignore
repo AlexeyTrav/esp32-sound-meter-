@@ -1,0 +1,11 @@
+node_modules/
+config.json
+# Browser profile + saved session cookies: equivalent to a logged-in OPERA session
+profile/
+.profile.lock
+.profile.session.json
+.*.session.json
+.*.lock
+# Contain guest PII
+output/
+debug/

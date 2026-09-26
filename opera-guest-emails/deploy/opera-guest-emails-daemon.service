@@ -1,0 +1,26 @@
+# Recommended: one long-running browser that keeps the OPERA session warm and
+# runs the daily export at dailyRunAt. Install as a *user* service of the
+# account that ran `npm run login` (it owns the profile folder):
+#   mkdir -p ~/.config/systemd/user
+#   cp deploy/opera-guest-emails-daemon.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now opera-guest-emails-daemon
+#   loginctl enable-linger $USER     # keep running when you log out
+[Unit]
+Description=OPERA Cloud guest email extractor (keep-alive + daily run)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/opera-guest-emails
+# TELEGRAM_BOT_TOKEN=..., TELEGRAM_CHAT_ID=...
+EnvironmentFile=-/opt/opera-guest-emails/.env
+ExecStart=/usr/bin/node src/cli.js daemon
+Restart=on-failure
+RestartSec=60
+# Exit 2 = session expired: a human must log in again; do not restart-loop.
+RestartPreventExitStatus=2
+
+[Install]
+WantedBy=default.target

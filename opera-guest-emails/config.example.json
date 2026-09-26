@@ -1,0 +1,43 @@
+{
+  "baseUrl": "https://mtcu9.oraclehospitality.us-ashburn-1.ocs.oraclecloud.com/ECHOICE1/operacloud/faces/opera-cloud-index/OperaCloud",
+  "property": "CND33",
+  "timezone": "America/Edmonton",
+
+  "outputDir": "./output",
+  "userDataDir": "./profile",
+  "debugDir": "./debug",
+
+  "headless": true,
+  "mode": "existing",
+  "overwrite": false,
+  "saveRaw": false,
+
+  "exportName": "MANUAL_RHG_GUEST_STA",
+  "fileNamePattern": "{PROPERTY}{YYYYMMDD}.GSR",
+  "generatedRowPick": "first",
+  "menuPath": ["Miscellaneous", "Exports", "General"],
+
+  "dateInputFormat": "auto",
+  "dateInputFallbackFormat": "MM-DD-YYYY",
+
+  "keepAliveMinutes": 15,
+  "dailyRunAt": "06:30",
+  "persistSessionCookies": true,
+
+  "timeouts": {
+    "navigationMs": 60000,
+    "elementMs": 30000,
+    "generationMs": 300000,
+    "lockWaitMs": 600000,
+    "loginWaitMs": 900000
+  },
+  "retries": { "attempts": 3, "delayMs": 5000 },
+
+  "notify": {
+    "webhookUrl": "",
+    "command": "",
+    "onSuccess": false
+  },
+
+  "browser": { "executablePath": "", "channel": "", "slowMo": 0 }
+}

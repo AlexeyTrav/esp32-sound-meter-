@@ -1,0 +1,12 @@
+# crontab -e   (as the user that owns /opt/opera-guest-emails/profile)
+# Only needed if you do NOT use the daemon (daemon = keep-alive + daily run in one process).
+CRON_TZ=America/Edmonton
+PATH=/usr/local/bin:/usr/bin:/bin
+TELEGRAM_BOT_TOKEN=put-token-here
+TELEGRAM_CHAT_ID=put-chat-id-here
+
+# Daily run for yesterday's business date at 06:30 Medicine Hat time
+30 6 * * *  cd /opt/opera-guest-emails && node src/cli.js run >> logs/run.log 2>&1
+
+# Keep the session warm every 15 minutes (skips itself while a run holds the profile)
+*/15 * * * *  cd /opt/opera-guest-emails && node src/cli.js keepalive --once >> logs/keepalive.log 2>&1

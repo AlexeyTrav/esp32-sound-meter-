@@ -1,0 +1,8 @@
+[Unit]
+Description=OPERA Cloud session keep-alive (single touch)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/opera-guest-emails
+EnvironmentFile=-/opt/opera-guest-emails/.env
+ExecStart=/usr/bin/node src/cli.js keepalive --once

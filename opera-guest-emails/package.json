@@ -1,0 +1,25 @@
+{
+  "name": "opera-guest-emails",
+  "version": "1.0.0",
+  "description": "Scrapes guest emails from the OPERA Cloud GSR 'Export Details' screen into a daily CSV for the post-stay survey pipeline.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "opera-guest-emails": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js run",
+    "login": "node src/cli.js login",
+    "check": "node src/cli.js check",
+    "keepalive": "node src/cli.js keepalive",
+    "daemon": "node src/cli.js daemon",
+    "discover": "node src/cli.js discover",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "playwright": "~1.56.1"
+  }
+}

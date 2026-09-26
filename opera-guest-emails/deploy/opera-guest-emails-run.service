@@ -1,0 +1,12 @@
+# One-shot daily run (alternative to the daemon). Pair with the .timer below
+# and with opera-guest-emails-keepalive.timer to keep the session warm.
+[Unit]
+Description=OPERA Cloud guest email extractor (one-shot daily run)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/opera-guest-emails
+EnvironmentFile=-/opt/opera-guest-emails/.env
+ExecStart=/usr/bin/node src/cli.js run

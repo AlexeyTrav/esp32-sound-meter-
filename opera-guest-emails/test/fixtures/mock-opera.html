@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mock OPERA Cloud</title>
+<style>
+  body { font-family: sans-serif; margin: 0; }
+  nav { background: #333; padding: 6px; }
+  nav button { color: #fff; background: none; border: 0; }
+  .menu { position: absolute; background: #fff; border: 1px solid #999; padding: 4px; }
+  .hidden { display: none; }
+  #detailsScroll { height: 200px; overflow-y: auto; }
+  td { border: 1px solid #ccc; padding: 2px 4px; }
+  .icon { display: inline-block; width: 16px; height: 16px; background: #888; }
+</style>
+</head>
+<body>
+<!-- Mimics the structure (not the ids) of OPERA Cloud: text/role-based only. -->
+<nav>
+  <button id="x1" aria-haspopup="menu">Front Desk</button>
+  <button id="x2" aria-haspopup="menu" onclick="toggle('miscMenu')">Miscellaneous</button>
+</nav>
+<div id="miscMenu" class="menu hidden" role="menu">
+  <div role="menuitem" tabindex="0" onclick="toggle('exportsMenu')">Exports</div>
+  <div id="exportsMenu" class="hidden" role="menu">
+    <div role="menuitem" tabindex="0" onclick="show('exportList')">General</div>
+    <div role="menuitem" tabindex="0">Back Office</div>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<div id="rowMenu" class="menu hidden" role="menu">
+  <div role="menuitem" tabindex="0" onclick="openExportData()">Export Data</div>
+  <div role="menuitem" tabindex="0" onclick="show('generated')">View Exports</div>
+</div>
+
+<script>
+const PROP = 'CND33';
+const state = { generated: [], pageSize: 10, page: 0 };
+const params = new URLSearchParams(location.search);
+// Pre-existing generated exports come from the URL: ?have=20260925,20260924
+for (const d of (params.get('have') || '').split(',').filter(Boolean)) state.generated.push(d);
+try { state.generated = JSON.parse(sessionStorage.getItem('gen')) || state.generated; } catch {}
+const saveGen = () => sessionStorage.setItem('gen', JSON.stringify(state.generated));
+const ROWS = Number(params.get('rows') || 23);
+
+function records(d) {
+  const out = [];
+  for (let i = 0; i < ROWS; i++) {
+    const email = i % 5 === 4 ? '' : `guest${i}@example.com`;
+    const arr = d.slice(0, 6) + String(Math.max(1, Number(d.slice(6)) - 2)).padStart(2, '0');
+    out.push(`${PROP}|${37374000 + i}|Last${i}|First${i}||1 Main St, Calgary, AB|CA|${email}|clerk@hotel.com@ECHOICE1|555${i}|${arr}|${d}|X`);
+  }
+  // one duplicate email
+  out.push(`${PROP}|37379999|Dup|Guest||addr|CA|guest0@example.com|5550|${d}|${d}|X`);
+  return out;
+}
+
+function toggle(id) { document.getElementById(id).classList.toggle('hidden'); }
+function hideMenus() { for (const m of document.querySelectorAll('.menu, #exportsMenu')) m.classList.add('hidden'); }
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
+function busy(fn) { window.AdfPage = { PAGE: { isSynchronizedWithServer: () => false } }; setTimeout(() => { fn(); window.AdfPage.PAGE.isSynchronizedWithServer = () => true; }, 150); }
+
+function actionsBtn(onclick) {
+  return `<td><a href="#" role="button" title="Actions" onclick="${onclick};return false;"><span class="icon"></span></a></td>`;
+}
+
+function show(view, arg) {
+  hideMenus();
+  busy(() => {
+    const app = document.getElementById('app');
+    if (view === 'exportList') {
+      app.innerHTML = `
+        <h1>Exports</h1>
+        <table><tbody>
+          <tr><td>OTHER_EXPORT</td><td>Something else</td><td>EXP_FOR_DATE</td>${actionsBtn("alert('wrong row')")}</tr>
+          <tr><td><table><tr><td>MANUAL_RHG_GUEST_STA</td></tr></table></td><td>Manual RHG Guest Stay Record (GSR)</td><td>EXP_FOR_DATE</td>${actionsBtn('openRowMenu(this)')}</tr>
+        </tbody></table>`;
+    } else if (view === 'generated') {
+      const rows = state.generated.map((d) => `<tr><td><a href="#" onclick="show('details','${d}');return false;">${PROP}${d}.GSR</a></td><td>${d}</td></tr>`).join('');
+      app.innerHTML = `<div>Exports / Generated Exports</div><h1>Generated Exports</h1><table><tbody>${rows}</tbody></table>`;
+    } else if (view === 'details') {
+      state.detail = records(arg); state.page = 0;
+      app.innerHTML = `<div>Exports / Generated Exports / Export Details</div>
+        <h2>Export Details</h2><h3>Export Data</h3>
+        <label for="show">Show</label>
+        <select id="show" onchange="state.pageSize=Number(this.value)||1e9;state.page=0;busy(renderDetails)">
+          <option>10</option><option>25</option>
+        </select>
+        <div id="detailsScroll"><table><tbody id="detailRows"></tbody></table></div>
+        <div id="pager"></div>`;
+      renderDetails();
+    }
+  });
+}
+
+function renderDetails() {
+  const start = state.page * state.pageSize;
+  const slice = state.detail.slice(start, start + state.pageSize);
+  document.getElementById('detailRows').innerHTML = slice.map((r, i) => `<tr><td>${start + i + 1}</td><td>${r}</td></tr>`).join('');
+  const last = start + state.pageSize >= state.detail.length;
+  document.getElementById('pager').innerHTML =
+    `<span>${start + 1} - ${start + slice.length} of ${state.detail.length}</span>
+     <button ${last ? 'disabled' : ''} onclick="state.page++;busy(renderDetails)">Next</button>`;
+}
+
+function openRowMenu(btn) {
+  const m = document.getElementById('rowMenu');
+  const r = btn.getBoundingClientRect();
+  m.style.left = r.left + 'px'; m.style.top = r.bottom + 'px';
+  m.classList.remove('hidden');
+}
+
+function openExportData() {
+  hideMenus();
+  const d = new Date(); d.setDate(d.getDate());
+  const pre = String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '-' + d.getFullYear();
+  const dlg = el(`<div role="dialog" aria-label="Export Data">
+    <label for="expdate">EXP_FOR_DATE</label><input id="expdate" type="text" value="${pre}">
+    <button onclick="this.closest('[role=dialog]').remove()">Cancel</button>
+    <button id="go">Export</button></div>`);
+  dlg.querySelector('#go').onclick = () => {
+    const v = dlg.querySelector('#expdate').value; // MM-DD-YYYY
+    const m = /^(\d\d)-(\d\d)-(\d{4})$/.exec(v);
+    dlg.remove();
+    if (!m) { document.body.append(el('<div role="alert">Error: invalid date</div>')); return; }
+    window.__submits = (window.__submits || 0) + 1;
+    setTimeout(() => { state.generated.unshift(m[3] + m[1] + m[2]); saveGen(); }, 500);
+  };
+  document.body.append(dlg);
+}
+</script>
+</body>
+</html>

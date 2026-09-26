@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily OPERA guest email extraction
+
+[Timer]
+# 06:30 Medicine Hat time, whatever the server's own timezone is
+OnCalendar=*-*-* 06:30:00 America/Edmonton
+Persistent=true
+
+[Install]
+WantedBy=timers.target
