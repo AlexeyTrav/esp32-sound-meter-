@@ -1,0 +1,5 @@
+config.ini
+output/
+sent_log.csv
+__pycache__/
+unsubscribe.txt

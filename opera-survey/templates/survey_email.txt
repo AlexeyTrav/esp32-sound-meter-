@@ -1,0 +1,16 @@
+Dear {first_name},
+
+Thank you for staying with us at {name} ({arrival} to {departure}).
+We would love to hear how your stay went. The survey takes about two minutes:
+
+{survey_link}
+
+Your feedback helps our team make every stay better.
+
+Warm regards,
+The {name} team
+
+--
+{name}, {address} | {phone} | {contact_email}
+You are receiving this because you recently stayed with us. To stop receiving
+these emails, reply with UNSUBSCRIBE.
